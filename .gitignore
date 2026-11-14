@@ -9,6 +9,7 @@ dist/
 
 # User config / Local state files
 ffx_text_tool_recent_files.json
+spira_text_tool_recent_files.json
 
 # Local backups
 *.bak

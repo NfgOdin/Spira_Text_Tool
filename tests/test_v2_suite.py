@@ -3,9 +3,11 @@ import sys
 import re
 
 # Ensure workspace in sys.path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
+import Spira_Text_Tool
 import FFX_Text_Tool
 from ffx_codec import FFXCodec, FILE_RECORD_SIZES
 import canonical_lore
@@ -16,8 +18,9 @@ def run_tests():
     print("========================================")
 
     # 1. Versioning
+    assert Spira_Text_Tool.APP_VERSION == "v2.0.0", f"Expected v2.0.0, got {Spira_Text_Tool.APP_VERSION}"
     assert FFX_Text_Tool.APP_VERSION == "v2.0.0", f"Expected v2.0.0, got {FFX_Text_Tool.APP_VERSION}"
-    print("[PASS] Version metadata is v2.0.0")
+    print("[PASS] Version metadata is v2.0.0 (Spira_Text_Tool & FFX_Text_Tool)")
 
     # 2. Pillar 1: FFX-2 Table Support
     assert "dress.bin" in FILE_RECORD_SIZES
@@ -173,5 +176,11 @@ def run_tests():
 
     print("\nALL 5 PILLARS SYSTEM TESTS PASSED SUCCESSFULLY!")
 
+import unittest
+
+class TestV2Suite(unittest.TestCase):
+    def test_v2_all_pillars(self):
+        run_tests()
+
 if __name__ == "__main__":
-    run_tests()
+    unittest.main()

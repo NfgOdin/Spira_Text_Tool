@@ -84,11 +84,14 @@ class TestPolishFeatures(unittest.TestCase):
             self.assertIn("<Button-3>", binds)
 
     def test_04_pyinstaller_spec_bundling(self):
-        spec_path = os.path.join(os.path.dirname(__file__), "..", "FFX_Text_Tool.spec")
-        self.assertTrue(os.path.exists(spec_path))
-        with open(spec_path, "r", encoding="utf-8") as f:
+        spira_spec = os.path.join(os.path.dirname(__file__), "..", "Spira_Text_Tool.spec")
+        ffx_spec = os.path.join(os.path.dirname(__file__), "..", "FFX_Text_Tool.spec")
+        self.assertTrue(os.path.exists(spira_spec))
+        self.assertTrue(os.path.exists(ffx_spec))
+        with open(spira_spec, "r", encoding="utf-8") as f:
             spec_content = f.read()
         self.assertIn("ffx_encoding", spec_content)
+        self.assertIn("Spira_Text_Tool", spec_content)
 
     def test_05_codec_bundled_charset_path(self):
         codec = FFXCodec()

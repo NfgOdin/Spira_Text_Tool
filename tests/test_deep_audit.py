@@ -6,9 +6,11 @@ import tkinter as tk
 import json
 
 # Ensure paths
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
+import Spira_Text_Tool
 import FFX_Text_Tool
 from ffx_codec import FFXCodec, FILE_RECORD_SIZES
 import canonical_lore
@@ -22,8 +24,8 @@ def deep_audit():
     root.withdraw()
     
     try:
-        app = FFX_Text_Tool.FFXTextToolGUI(root)
-        print("[PASS 1/10] GUI Headless Initialization")
+        app = Spira_Text_Tool.SpiraTextToolGUI(root)
+        print("[PASS 1/10] GUI Headless Initialization (SpiraTextToolGUI)")
 
         # 2. Theme Adaptation Tests
         for game in ["Final Fantasy X", "Final Fantasy X-2", "Final Fantasy X"]:
@@ -146,5 +148,11 @@ def deep_audit():
     finally:
         root.destroy()
 
+import unittest
+
+class TestDeepAudit(unittest.TestCase):
+    def test_all_deep_audit_checks(self):
+        deep_audit()
+
 if __name__ == "__main__":
-    deep_audit()
+    unittest.main()
