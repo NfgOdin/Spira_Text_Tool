@@ -108,7 +108,11 @@ class FFXCodec:
                 unsupported.append(char)
         return unsupported
 
-    def decode_ffx_bytes(self, table, offset, charset="us"):
+    def decode_ffx_bytes(self, table, offset=0, charset="us"):
+        if isinstance(offset, str):
+            charset = offset
+            offset = 0
+            
         self.load_charset(charset)
         byte_to_char = self.byte_to_char_maps.get(charset, {})
         
@@ -351,6 +355,8 @@ class FFXCodec:
                 return [int(parts[1], 16), int(parts[2], 16), int(parts[3], 16)]
         return None
 
+    decode_ffx_string = decode_ffx_bytes
+
     def encode_ffx_string(self, string, charset="us"):
         byte_list = []
         i = 0
@@ -498,10 +504,10 @@ class FFXCodec:
         # Encode all strings and prepare unique mappings
         refs = []
         for r in records:
-            refs.append(('name', r['name'], r))
-            refs.append(('sname', r['sname'], r))
-            refs.append(('desc', r['desc'], r))
-            refs.append(('sdesc', r['sdesc'], r))
+            refs.append(('name', r.get('name', ''), r))
+            refs.append(('sname', r.get('sname', ''), r))
+            refs.append(('desc', r.get('desc', ''), r))
+            refs.append(('sdesc', r.get('sdesc', ''), r))
             
         encoded_cache = {}
         for ref_type, s, r in refs:
@@ -529,7 +535,7 @@ class FFXCodec:
         data_blocks = []
         record_length = 16
         if records:
-            record_length = 16 + len(records[0]['extra_bytes'])
+            record_length = 16 + len(records[0].get('extra_bytes', b''))
             
         for r in records:
             offs = rec_offsets[id(r)]
@@ -539,7 +545,7 @@ class FFXCodec:
                 offs.get('desc', 0), r.get('desc_key', 0),
                 offs.get('sdesc', 0), r.get('sdesc_key', 0)
             )
-            record_block = header_bytes + r['extra_bytes']
+            record_block = header_bytes + r.get('extra_bytes', b'')
             data_blocks.append(record_block)
             
         data_bytes = b"".join(data_blocks)
@@ -547,7 +553,8 @@ class FFXCodec:
         
         # Build 20-byte file header
         tot_len = len(data_bytes)
-        file_header = magic_part + struct.pack("<HHHH", min_idx, max_idx, record_length, tot_len) + struct.pack("<I", 20)
+        magic_8b = (magic_part[:8] if magic_part else b"").ljust(8, b"\x00")
+        file_header = magic_8b + struct.pack("<HHHH", min_idx, max_idx, record_length, tot_len) + struct.pack("<I", 20)
         
         # Write file
         with open(filepath, "wb") as f:

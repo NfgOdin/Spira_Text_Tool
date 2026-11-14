@@ -31,6 +31,10 @@ def decode_spiramod_meta(encoded_str: str) -> Optional[Dict[str, Any]]:
     except Exception:
         return None
 
+def validate_modinfo(info: Dict[str, Any]) -> bool:
+    required = ["name", "version"]
+    return isinstance(info, dict) and all(k in info and bool(info[k]) for k in required)
+
 def create_mod_archive(
     out_path: str,
     files_to_pack: List[Tuple[str, str]],

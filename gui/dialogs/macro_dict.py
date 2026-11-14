@@ -198,8 +198,12 @@ def show_macro_dictionary_dialog(parent):
         matched_count = 0
         for tag_key, data in sorted(parent.macro_db.items()):
             tag_display = f"{{MCR:{tag_key}}}"
-            cat = data.get('category', 'General')
-            text_val = data.get('text', '')
+            if isinstance(data, dict):
+                cat = data.get('category', 'General')
+                text_val = data.get('text', '')
+            else:
+                cat = 'General'
+                text_val = str(data)
 
             if cat_filter != "All Categories" and cat != cat_filter:
                 continue

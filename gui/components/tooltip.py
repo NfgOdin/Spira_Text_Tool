@@ -34,6 +34,9 @@ class ToolTip:
         )
         lbl.pack()
 
+    def show_tip(self, text: str, x: int = 100, y: int = 100):
+        self.show(text, x, y)
+
     def hide(self):
         if self.tip_window:
             try:

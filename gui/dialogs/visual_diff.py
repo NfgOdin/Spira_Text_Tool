@@ -7,30 +7,31 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 
-def open_visual_diff_dialog(parent):
+def open_visual_diff_dialog(parent, start_idx=None):
     """
     Visual Side-by-Side Diff Viewer (Pillar 4).
     Compares active entry against vanilla baseline (new_uspc) with byte deltas.
     Includes interactive previous/next entry navigation and Alt+Left / Alt+Right hotkeys.
     """
-    if not parent.records:
+    if not getattr(parent, 'records', None):
         messagebox.showwarning("Warning", "No active records loaded.")
         return
 
-    sel = parent.tree.selection()
-    start_idx = 0
-    if sel:
-        try:
-            target_id = int(sel[0])
-            for i, r in enumerate(parent.records):
-                if r['id'] == target_id:
-                    start_idx = i
-                    break
-        except ValueError:
-            for i, r in enumerate(parent.records):
-                if str(r['id']) == sel[0]:
-                    start_idx = i
-                    break
+    if start_idx is None:
+        sel = parent.tree.selection() if hasattr(parent, 'tree') else ()
+        start_idx = 0
+        if sel:
+            try:
+                target_id = int(sel[0])
+                for i, r in enumerate(parent.records):
+                    if r['id'] == target_id:
+                        start_idx = i
+                        break
+            except ValueError:
+                for i, r in enumerate(parent.records):
+                    if str(r['id']) == sel[0]:
+                        start_idx = i
+                        break
 
     current_diff_idx = start_idx
     ref_recs = parent.get_reference_records_for_file(parent.active_file_path, "new_uspc") if parent.active_file_path else []
@@ -88,6 +89,10 @@ def open_visual_diff_dialog(parent):
         rec = parent.records[idx]
         eid = rec['id']
         ref_rec = ref_map.get(eid)
+        if not ref_rec:
+            ref_rec = ref_map.get(str(eid))
+        if not ref_rec and isinstance(eid, str) and eid.isdigit():
+            ref_rec = ref_map.get(int(eid))
 
         active_text = rec.get('name', '')
         if rec.get('desc') and rec.get('desc') != '-':
@@ -131,16 +136,19 @@ def open_visual_diff_dialog(parent):
     btn_prev = tk.Button(bottom, text="⬅️ Previous Entry (Alt+Left)", command=lambda: load_entry(current_diff_idx - 1),
                          bg=parent.card_color, fg=parent.text_color, font=("Segoe UI", 9), relief="flat", padx=10, pady=3)
     btn_prev.pack(side="left", padx=(0, 8))
-    parent.bind_hover(btn_prev)
+    if hasattr(parent, 'bind_hover'):
+        parent.bind_hover(btn_prev)
 
     btn_next = tk.Button(bottom, text="Next Entry ➡️ (Alt+Right)", command=lambda: load_entry(current_diff_idx + 1),
                          bg=parent.card_color, fg=parent.text_color, font=("Segoe UI", 9), relief="flat", padx=10, pady=3)
     btn_next.pack(side="left")
-    parent.bind_hover(btn_next)
+    if hasattr(parent, 'bind_hover'):
+        parent.bind_hover(btn_next)
 
     btn_close = tk.Button(bottom, text="Close", command=dialog.destroy, bg=parent.card_color, fg=parent.text_color, font=("Segoe UI", 9), relief="flat", padx=14, pady=3)
     btn_close.pack(side="right")
-    parent.bind_hover(btn_close)
+    if hasattr(parent, 'bind_hover'):
+        parent.bind_hover(btn_close)
 
     dialog.bind("<Alt-Left>", lambda e: load_entry(current_diff_idx - 1))
     dialog.bind("<Alt-Right>", lambda e: load_entry(current_diff_idx + 1))

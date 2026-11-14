@@ -62,3 +62,5 @@ class DebouncedSearchFrame(ttk.Frame):
 
     def select_range(self, start, end):
         self.ent_search.select_range(start, end)
+
+DebouncedSearch = DebouncedSearchFrame

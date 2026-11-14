@@ -184,3 +184,17 @@ def index_lore_terms(source_lang='en', target_lang='jp'):
         if s_val and t_val:
             tm[s_val] = t_val
     return tm
+
+get_canonical_term = lookup_lore_term
+
+def search_lore_glossary(query: str, lang: str = 'en'):
+    if not query:
+        return CANONICAL_LORE_GLOSSARY
+    query_lower = query.strip().lower()
+    results = []
+    for row in CANONICAL_LORE_GLOSSARY:
+        for k, v in row.items():
+            if k != 'category' and query_lower in v.lower():
+                results.append(row)
+                break
+    return results

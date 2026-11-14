@@ -16,7 +16,7 @@ def open_search_replace_dialog(parent):
     Global Search & Replace dialog with scope filtering, preview window,
     regex support, and automatic backups.
     """
-    if not parent.records:
+    if not getattr(parent, 'records', None):
         messagebox.showwarning("Warning", "Load the target table file in the editor first.")
         return
 

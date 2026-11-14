@@ -1871,6 +1871,9 @@ class FFXTextToolGUI:
             self.active_choice_idx = (self.active_choice_idx + 1) % self.total_choices
             self.update_live_preview()
 
+    prev_choice = prev_choice_option
+    next_choice = next_choice_option
+
     def clear_search(self):
         self.ent_search.delete(0, tk.END)
         self.filter_treeview()
@@ -2750,6 +2753,9 @@ class FFXTextToolGUI:
                 self.lbl_search_count.config(text=f"{visible_count} of {total_records} matches")
             else:
                 self.lbl_search_count.config(text=f"{total_records} entries")
+
+    populate_table = filter_treeview
+    filter_table = filter_treeview
 
     def _apply_edits_for_record_id(self, target_id):
         record = next((r for r in self.records if r['id'] == target_id or str(r['id']) == str(target_id)), None)

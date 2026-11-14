@@ -35,6 +35,14 @@ class QAError:
     fix_type: Optional[str]
     file_path: str
 
+    @property
+    def file_name(self) -> str:
+        return self.file
+
+    @property
+    def is_auto_fixable(self) -> bool:
+        return self.is_fixable
+
     def to_tuple(self):
         sev_display = f"🔴 {self.severity}" if self.severity == "CRITICAL" else f"🟡 {self.severity}"
         return (sev_display, self.file, self.entry_id, self.field, self.message, self.snippet, self.is_fixable, self.fix_type, self.file_path)
@@ -84,8 +92,11 @@ def auto_fix_string(text: str, fix_type: str) -> str:
     elif fix_type == 'normalize_tag_whitespace':
         new_s = re.sub(r'\{\s*([A-Za-z0-9_]+)\s*(?::\s*([^}]+?)\s*)?\}',
                        lambda m: f"{{{m.group(1)}:{m.group(2).strip()}}}" if m.group(2) else f"{{{m.group(1)}}}", new_s)
-    elif fix_type == 'trim_trailing_whitespace':
-        new_s = '\n'.join(line.rstrip() for line in new_s.split('\n'))
+    elif fix_type in ('trim_trailing_whitespace', 'trailing_space'):
+        new_s = '\n'.join(line.rstrip() for line in new_s.split('\n')).rstrip()
+    elif fix_type == 'unclosed_tag':
+        if new_s.count("{") > new_s.count("}"):
+            new_s = new_s + "}" * (new_s.count("{") - new_s.count("}"))
 
     return new_s
 
@@ -304,4 +315,12 @@ class QAEngine:
 
         for fld, val in fields:
             issues.extend(self.audit_record_field(val, fld, eid, file_label, file_path, charset))
+        return issues
+
+    def audit_records(self, records: List[Dict[str, Any]], file_label: str, file_path: str = "", charset: str = "us") -> List[QAError]:
+        """Audits a full list of records, including file-level pool overflow checks."""
+        issues: List[QAError] = []
+        for r in records:
+            issues.extend(self.audit_record(r, file_label, file_path, charset))
+        issues.extend(self.audit_records_pool(records, file_label, file_path, charset))
         return issues

@@ -20,6 +20,11 @@ class SearchIndexer:
         self.indexed_records: List[IndexedRecord] = []
         self._record_map: Dict[Any, IndexedRecord] = {}
 
+    def clear(self):
+        """Clears all indexed records."""
+        self.indexed_records.clear()
+        self._record_map.clear()
+
     def build_index(self, records: List[Dict[str, Any]], mode: str = "kernel"):
         """Pre-computes lowercase searchable text for all records in memory."""
         self.indexed_records.clear()

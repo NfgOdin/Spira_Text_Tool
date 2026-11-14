@@ -15,7 +15,7 @@ class TaskProgressDialog:
         self.on_complete = on_complete
         
         # Parent root reference
-        root = parent.winfo_toplevel() if hasattr(parent, 'winfo_toplevel') else parent
+        root = parent.winfo_toplevel() if hasattr(parent, 'winfo_toplevel') else getattr(parent, 'root', parent)
         self.dialog = tk.Toplevel(root)
         self.dialog.title(title)
         self.dialog.geometry("460x170")

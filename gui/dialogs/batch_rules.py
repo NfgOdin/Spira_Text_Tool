@@ -21,6 +21,9 @@ def open_batch_ruleset_dialog(parent):
     Enables localization teams to create, save, load, and execute JSON rulesets
     across single files or the entire localization tree.
     """
+    if not hasattr(parent, 'batch_rules') or parent.batch_rules is None:
+        parent.batch_rules = []
+
     dialog = tk.Toplevel(parent.root)
     dialog.title("⚡ Reusable Batch Replacement Ruleset Manager")
     dialog.geometry("780x560")

@@ -70,7 +70,8 @@ class BatchRulesEngine:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             rules = []
-            for item in data.get('rules', []):
+            items = data.get('rules', []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+            for item in items:
                 rules.append(BatchRule(
                     find=item.get('find', ''),
                     replace=item.get('replace', ''),
@@ -82,13 +83,20 @@ class BatchRulesEngine:
             return []
 
     @staticmethod
-    def save_ruleset(filepath: str, rules: List[BatchRule], name: str = "Ruleset") -> bool:
+    def save_ruleset(filepath_or_rules: Any, rules_or_filepath: Any, name: str = "Ruleset") -> bool:
         """Saves rules to a JSON ruleset file."""
+        if isinstance(filepath_or_rules, (list, tuple)):
+            rules = filepath_or_rules
+            filepath = rules_or_filepath
+        else:
+            filepath = filepath_or_rules
+            rules = rules_or_filepath
+
         try:
             payload = {
                 "name": name,
                 "version": "2.0.0",
-                "rules": [asdict(r) for r in rules]
+                "rules": [asdict(r) if hasattr(r, '__dataclass_fields__') else dict(r) for r in rules]
             }
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(payload, f, indent=2, ensure_ascii=False)
@@ -108,3 +116,6 @@ class BatchRulesEngine:
                     record[fld] = new_val
                     total_reps += n
         return record, total_reps
+
+load_ruleset = BatchRulesEngine.load_ruleset
+save_ruleset = BatchRulesEngine.save_ruleset
